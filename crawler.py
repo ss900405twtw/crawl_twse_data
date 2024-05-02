@@ -395,7 +395,6 @@ def crawl_monthly_report(date, conn):
         print('**WARRN: requests cannot get html')
         return None
 
-    import lxml
 
     try:
         html_df = pd.read_html(StringIO(r.text))
@@ -413,9 +412,16 @@ def crawl_monthly_report(date, conn):
         df.columns = df.columns.get_level_values(1)
         df.columns = df.columns.str.replace(' ', '')
     else:
-        df = df[list(range(0,10))]
-        column_index = df.index[(df[0] == '公司代號')][0]
-        df.columns = df.iloc[column_index]
+        # original method
+        # df = df[df.columns.difference(list(range(0, 10)))]
+        # df = df[list(range(0,10))]
+        # column_index = df.index[(df[0] == '公司代號')][0]
+        # df.columns = df.iloc[column_index]
+
+        # modify method
+        df = df[df.columns.difference(list(range(0, 10)))]
+        df.columns = [item[1] for item in df.columns]
+        df.columns = df.columns.str.replace(' ', '')
 
     df['當月營收'] = pd.to_numeric(df['當月營收'], 'coerce')
     df = df[~df['當月營收'].isnull()]
@@ -735,9 +741,9 @@ def update_table(conn, table_name, crawl_function, dates):
 
 
         if len(df) > 50000:
+            print('save', len(df))
             add_to_sql(conn, table_name, df)
             df = pd.DataFrame()
-            print('save', len(df))
 
         time.sleep(15)
 

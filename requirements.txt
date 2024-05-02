@@ -6,3 +6,4 @@ sqlalchemy==1.4.43
 mysqlclient==2.2.4
 tqdm==4.64.1
 ipywidgets==8.0.4
+lxml==4.9.3
